@@ -1,0 +1,19 @@
+import requests
+
+binance_response = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT")
+binance_price = float(binance_response.json()["price"])
+
+bybit_response = requests.get("https://api.bybit.com/v2/public/tickers?symbol=BTCUSD")
+bybit_price = float(bybit_response.json()["result"][0]["last_price"])
+
+kucoin_response = requests.get("https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=BTC-USDT")
+kucoin_price = float(kucoin_response.json()["data"]["price"])
+
+best_price = min(binance_price, bybit_price, kucoin_price)
+
+if best_price == binance_price:
+    print(f"Лучшая цена на биткоин: {best_price} на бирже Binance")
+elif best_price == bybit_price:
+    print(f"Лучшая цена на биткоин: {best_price} на бирже Bybit")
+else:
+    print(f"Лучшая цена на биткоин: {best_price} на бирже Kucoin")
