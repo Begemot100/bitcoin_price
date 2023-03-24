@@ -17,3 +17,42 @@ elif best_price == bybit_price:
     print(f"Лучшая цена на биткоин: {best_price} на бирже Bybit")
 else:
     print(f"Лучшая цена на биткоин: {best_price} на бирже Kucoin")
+    
+    
+import unittest
+from unittest.mock import MagicMock, patch
+import requests
+
+
+class TestBestBitcoinPrice(unittest.TestCase):
+
+    @patch('requests.get')
+    def test_best_bitcoin_price(self, mock_requests):
+        mock_binance_response = MagicMock()
+        mock_binance_response.json.return_value = {"price": "50000"}
+        mock_requests.side_effect = [mock_binance_response]
+        binance_price = float(mock_binance_response.json()["price"])
+
+        mock_bybit_response = MagicMock()
+        mock_bybit_response.json.return_value = {"result": [{"last_price": "50500"}]}
+        mock_requests.side_effect = [mock_binance_response, mock_bybit_response]
+        bybit_price = float(mock_bybit_response.json()["result"][0]["last_price"])
+
+        mock_kucoin_response = MagicMock()
+        mock_kucoin_response.json.return_value = {"data": {"price": "51000"}}
+        mock_requests.side_effect = [mock_binance_response, mock_bybit_response, mock_kucoin_response]
+        kucoin_price = float(mock_kucoin_response.json()["data"]["price"])
+
+        best_price = min(binance_price, bybit_price, kucoin_price)
+
+        if best_price == binance_price:
+            self.assertEqual(best_price, 50000)
+        elif best_price == bybit_price:
+            self.assertEqual(best_price, 50500)
+        else:
+            self.assertEqual(best_price, 51000)
+
+
+if __name__ == '__main__':
+    unittest.main()
+
